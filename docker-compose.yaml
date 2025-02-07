@@ -14,7 +14,7 @@ services:
     volumes:
       - ./src:/var/www/html:delegated
   composer:
-    build: 
+    build:
       context: ./dockerfiles
       dockerfile: composer.dockerfile
     volumes:
@@ -37,7 +37,7 @@ services:
     ports:
       - "3308:3306"
     restart: unless-stopped
-       env_file:
+    env_file:
       - ./env/mysql-test.env
   # mailhog:
   #   image: mailhog/mailhog

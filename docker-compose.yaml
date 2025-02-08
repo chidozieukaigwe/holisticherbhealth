@@ -1,10 +1,12 @@
 services:
   server:
-    build:
-      context: .
-      dockerfile: dockerfiles/nginx.dockerfile
+    image: chidodesigns/holisticherbhealth-nginx
+    # build:
+    #   context: .
+    #   dockerfile: dockerfiles/nginx.dockerfile
     ports:
       - "8000:80"
+      - "8443:443"
     # volumes:
     #   - ./src:/var/www/html
     #   - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
@@ -12,17 +14,19 @@ services:
       - php
       - mysql
   php:
-    build:
-      context: .
-      dockerfile: dockerfiles/php.dockerfile
+    image: chidodesigns/holisticherbhealth-php
+    # build:
+    #   context: .
+    #   dockerfile: dockerfiles/php.dockerfile
     # volumes:
     #   - ./src:/var/www/html:delegated
   composer:
-    build:
-      context: ./dockerfiles
-      dockerfile: composer.dockerfile
-    volumes:
-      - ./src:/var/www/html
+    image: chidodesigns/holisticherbhealth-composer
+    # build:
+    #   context: .
+    #   dockerfile: dockerfiles/composer.dockerfile
+    # volumes:
+    #   - ./src:/var/www/html
   artisan:
     build:
       context: .

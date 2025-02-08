@@ -9,3 +9,6 @@ tests/
 *.log 
 *.env 
 notes.txt
+dockerfiles/*
+src/vendor 
+src/node_modules

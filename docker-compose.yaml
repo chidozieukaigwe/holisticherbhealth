@@ -7,6 +7,9 @@ services:
     ports:
       - "8000:80"
       - "8443:443"
+    env_file:
+      - ./env/nginx.env
+
     # volumes:
     #   - ./src:/var/www/html
     #   - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro

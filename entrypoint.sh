@@ -12,28 +12,28 @@ ENV_FILE="/var/www/html/.env"
 if grep -q "^APP_NAME=" "$ENV_FILE"; then
     sed -i "s/^APP_NAME=.*/APP_NAME=${APP_NAME}/" "$ENV_FILE"
 else
-    echo "DB_HOST=${DB_HOST}" >> "$ENV_FILE"
+    echo "APP_NAME=${APP_NAME}" >> "$ENV_FILE"
 fi
 
 # Update or add DB_PORT
 if grep -q "^APP_ENV=" "$ENV_FILE"; then
     sed -i "s/^APP_ENV=.*/APP_ENV=${APP_ENV}/" "$ENV_FILE"
 else
-    echo "DB_HOST=${DB_HOST}" >> "$ENV_FILE"
+    echo "APP_ENV=${APP_ENV}" >> "$ENV_FILE"
 fi
 
 # Update or add DB_PORT
 if grep -q "^DB_PORT=" "$ENV_FILE"; then
     sed -i "s/^DB_PORT=.*/DB_PORT=${DB_PORT}/" "$ENV_FILE"
 else
-    echo "DB_HOST=${DB_HOST}" >> "$ENV_FILE"
+    echo "DB_PORT=${DB_PORT}" >> "$ENV_FILE"
 fi
 
 # Update or add DB_CONNECTION
 if grep -q "^DB_CONNECTION=" "$ENV_FILE"; then
     sed -i "s/^DB_CONNECTION=.*/DB_CONNECTION=${DB_CONNECTION}/" "$ENV_FILE"
 else
-    echo "DB_HOST=${DB_HOST}" >> "$ENV_FILE"
+    echo "DB_CONNECTION=${DB_CONNECTION}" >> "$ENV_FILE"
 fi
 
 # Update or add DB_HOST

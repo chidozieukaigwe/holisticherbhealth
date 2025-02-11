@@ -11,3 +11,6 @@ tests/
 notes.txt
 dockerfiles/*
 src/node_modules
+src/vendor
+src/.env
+src/.env.local

@@ -1,17 +1,38 @@
 services:
   server:
-    image: chidodesigns/holisticherbhealth-nginx
+    build:
+      context: .
+      dockerfile: dockerfiles/nginx.dockerfile
+    ports:
+      - "8000:80"
+      - "8443:443"
+    env_file:
+      - ./env/nginx.env
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/templates/default.conf.template
     depends_on:
       - php
       - mysql
   php:
-    image: chidodesigns/holisticherbhealth-php
-    depends_on:
-      - mysql
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+    env_file:
+      - ./src/.env.local
   composer:
-    image: chidodesigns/holisticherbhealth-composer
+    build:
+      context: .
+      dockerfile: dockerfiles/composer.dockerfile
+    volumes:
+      - ./src:/var/www/html
   artisan:
-    image: chidodesigns/holisticherbhealth-php
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+    volumes:
+      - ./src:/var/www/html
     entrypoint: ["php", "/var/www/html/artisan"]
   npm:
     image: node:22-alpine

@@ -2,25 +2,55 @@ FROM php:8.2-fpm-alpine AS app
 
 WORKDIR /var/www/html
 
-RUN apk add --no-cache \
+# Install system dependencies
+RUN apk update && apk add --no-cache \
     git \
-    make \
+    curl \
+    libpng-dev \
+    oniguruma-dev \ 
+    libxml2-dev \
+    zip \
     unzip \
-    && rm -rf /var/cache/apk/*
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    zlib-dev \
+    libzip-dev
 
-#  @notes: we uncomment if we want composer installed into the container 
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# ENV COMPOSER_ALLOW_SUPERUSER=1
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# COPY ./src/composer.* ./
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-# RUN composer install --ignore-platform-reqs  --prefer-dist --no-dev --no-scripts --no-progress --no-interaction
+COPY ./src/composer.* ./
 
 COPY src .
 
-RUN docker-php-ext-install pdo pdo_mysql
+RUN mv .env.example .env
+
+RUN composer install --ignore-platform-reqs  --prefer-dist --no-dev --no-scripts --no-progress --no-interaction
+
+RUN composer dump-autoload
+
+# Set permissions for Laravel storage and bootstrap cache
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 RUN chown -R www-data:www-data /var/www/html
+
+# Set entrypoint
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Start PHP-FPM
+CMD ["php-fpm"]
+
+
+# Expose port 9000 for PHP-FPM
+# EXPOSE 9000
 

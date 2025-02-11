@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+if [ "$APP_ENV" = "staging" ] || [ "$APP_ENV" = "testing" ]; then
+set -x # Enable Debugging
+fi
+
 # This entrypoint script is to inject any and all env variables into the laravel .env file - DO NOT RUN LOCALLY
 
 if [ "$APP_ENV" = "production" ] || [ "$APP_ENV" = "staging" ] || [ "$APP_ENV" = "testing" ]; then
@@ -67,9 +71,9 @@ fi
 fi
 
 # Run migrations only in production or staging
-if [ "$APP_ENV" = "production" ] || [ "$APP_ENV" = "staging" ] || [ "$APP_ENV" = "testing" ]; then
-  php artisan migrate --force
-fi
+# if [ "$APP_ENV" = "production" ] || [ "$APP_ENV" = "staging" ]; then
+#   php artisan migrate --force
+# fi
 
 # Generate APP_KEY in .env file is empty at startup
 php artisan key:generate
@@ -77,4 +81,5 @@ php artisan config:cache
 php artisan config:clear
 
 # Start the main process
+echo "Starting application..."
 exec "$@"

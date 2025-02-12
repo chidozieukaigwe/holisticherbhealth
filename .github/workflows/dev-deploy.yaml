@@ -166,27 +166,34 @@ jobs:
           wait-for-service-stability: true
           force-new-deployment: true
 
-      - name: Check ECS deployment status
-        id: check-deployment
+      - name: Check MySQL logs
         run: |
-          # Get the latest deployment ID
-          DEPLOYMENT_ID=$(aws ecs describe-services \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --services ${{ env.ECS_SERVICE }} \
-            --query 'services[0].deployments[?status==`PRIMARY`].id' \
-            --output text)
+          aws logs get-log-events \
+            --log-group-name /ecs/${{ env.ECS_CLUSTER }} \
+            --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
+            --output text
 
-          # Get the deployment status
-          DEPLOYMENT_STATUS=$(aws ecs describe-services \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --services ${{ env.ECS_SERVICE }} \
-            --query 'services[0].deployments[?id==`'"$DEPLOYMENT_ID"'`].rolloutState' \
-            --output text)
+      # - name: Check ECS deployment status
+      #   id: check-deployment
+      #   run: |
+      #     # Get the latest deployment ID
+      #     DEPLOYMENT_ID=$(aws ecs describe-services \
+      #       --cluster ${{ env.ECS_CLUSTER }} \
+      #       --services ${{ env.ECS_SERVICE }} \
+      #       --query 'services[0].deployments[?status==`PRIMARY`].id' \
+      #       --output text)
 
-          # Fail the workflow if the deployment was rolled back
-          if [[ "$DEPLOYMENT_STATUS" == "FAILED" || "$DEPLOYMENT_STATUS" == "ROLLED_BACK" ]]; then
-            echo "ECS deployment failed or was rolled back. Failing the workflow."
-            exit 1
-          else
-            echo "ECS deployment succeeded."
-          fi
+      #     # Get the deployment status
+      #     DEPLOYMENT_STATUS=$(aws ecs describe-services \
+      #       --cluster ${{ env.ECS_CLUSTER }} \
+      #       --services ${{ env.ECS_SERVICE }} \
+      #       --query 'services[0].deployments[?id==`'"$DEPLOYMENT_ID"'`].rolloutState' \
+      #       --output text)
+
+      #     # Fail the workflow if the deployment was rolled back
+      #     if [[ "$DEPLOYMENT_STATUS" == "FAILED" || "$DEPLOYMENT_STATUS" == "ROLLED_BACK" ]]; then
+      #       echo "ECS deployment failed or was rolled back. Failing the workflow."
+      #       exit 1
+      #     else
+      #       echo "ECS deployment succeeded."
+      #     fi

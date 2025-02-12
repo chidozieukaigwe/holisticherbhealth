@@ -160,9 +160,9 @@ jobs:
              .containerDefinitions[] |= (if .name == "${{ env.CONTAINER_NAME_PHP }}" then .image = $php_image else . end)' \
             updated-task-definition.json > temp.json && mv temp.json updated-task-definition.json
 
-          # Output the updated task definition
-          cat updated-task-definition.json
-          echo "task_definition=$(cat updated-task-definition.json)" >> $GITHUB_OUTPUT
+          # Output the updated task definition as a single-line JSON string
+          TASK_DEFINITION=$(jq -c . updated-task-definition.json)
+          echo "task_definition=$TASK_DEFINITION" >> $GITHUB_OUTPUT
 
       - name: Deploy Amazon ECS task definition
         # if: steps.check-changes.outputs.skip_build == 'false'

@@ -26,6 +26,12 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         working-directory: ./src
         run: composer install --no-interaction --prefer-dist --no-progress --ignore-platform-reqs
+      - name: PHP Code Sniffer
+        uses: php-actions/phpcs@v1
+        with:
+          php_version: 8.2
+          path: src/
+          standard: phpcs.xml
       - name: Run tests
         working-directory: ./src
         run: composer run-tests

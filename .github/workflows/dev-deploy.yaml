@@ -155,8 +155,8 @@ jobs:
           # Install jq (JSON processor)
           sudo apt-get install -y jq
 
-          # Create a temporary file for the updated task definition
-          cp ${{ env.ECS_TASK_DEFINITION }} updated-task-definition.json
+          # Copy the task definition to the temporary directory
+          cp ${{ env.ECS_TASK_DEFINITION }} ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json
 
           # Update the task definition file with the new image URIs
           jq \

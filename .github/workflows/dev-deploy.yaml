@@ -11,7 +11,7 @@ env:
   ECR_PHP_REPOSITORY: holisticherbhealth/php
   ECS_SERVICE: holisticherbhealth-service-v1
   ECS_CLUSTER: holisticherbhealthcluster
-  ECS_TASK_DEFINITION: .aws/dev-task-definition.json
+  ECS_TASK_DEFINITION: ./aws/dev-task-definition.json
   CONTAINER_NAME_NGINX: holisticherbhealth-server
   CONTAINER_NAME_PHP: holisticherbhealth-api
 

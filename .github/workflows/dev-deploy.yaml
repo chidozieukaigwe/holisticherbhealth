@@ -1,0 +1,21 @@
+name: 
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  build:
+    runs-on: ubuntu-latest
+     steps:
+        - uses: actions/checkout@v3
+        - name: Install Composer Dependencies
+          working-directory: ./src
+          run: composer install --prefer-dist
+  test: 
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+        - name: Run Test Suite
+          working-directory: ./src
+          run: composer run-tests

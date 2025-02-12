@@ -26,9 +26,6 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         working-directory: ./src
         run: composer install --no-interaction --prefer-dist --no-progress --ignore-platform-reqs
-      - name: Set Up App Encryption Key
-        working-directory: ./src
-        run:  php artisan key:generate
       - name: Run tests
         working-directory: ./src
         run: composer run-tests

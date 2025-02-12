@@ -14,6 +14,7 @@ env:
   ECS_TASK_DEFINITION: ./aws/dev-task-definition.json
   CONTAINER_NAME_NGINX: holisticherbhealth-server
   CONTAINER_NAME_PHP: holisticherbhealth-api
+  ACTIONS_STEP_DEBUG: true
 
 jobs:
   lint:
@@ -126,7 +127,7 @@ jobs:
           image-2: ${{ steps.build-php-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}

@@ -4,6 +4,22 @@ on:
     branches:
       - develop
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Lint code
+        run: npm run lint
   test: 
     runs-on: ubuntu-latest
     steps:
@@ -20,4 +36,4 @@ jobs:
         run: composer install --no-interaction --prefer-dist --no-progress --no-suggest --ignore-platform-reqs
       - name: Run tests
         working-directory: ./src
-        un: composer run-phpunit
+        run: composer run-phpunit

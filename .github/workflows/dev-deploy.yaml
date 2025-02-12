@@ -4,18 +4,20 @@ on:
     branches:
       - develop
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-        - name: Install Composer Dependencies
-          uses: actions/checkout@v3
-          working-directory: ./src
-          run: composer install --prefer-dist
   test: 
-    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Run Test Suite
+      - name: Get Code
         uses: actions/checkout@v3
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: deps-composer-${{ hashFiles('**/composer.lock') }}
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: composer install --no-interaction --prefer-dist --no-progress --no-suggest --ignore-platform-reqs
+      - name: Run tests
         working-directory: ./src
-        run: composer run-tests
+        un: composer run-phpunit

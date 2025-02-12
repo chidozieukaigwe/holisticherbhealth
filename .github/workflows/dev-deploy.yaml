@@ -168,7 +168,6 @@ jobs:
 
           # Output the updated task definition as a single-line JSON string
           TASK_DEFINITION=$(jq -c . ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json)
-          cat $TASK_DEFINITION
           echo "task_definition=$TASK_DEFINITION" >> $GITHUB_OUTPUT
         
 

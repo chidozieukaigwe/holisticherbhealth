@@ -84,7 +84,6 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
-
       - name: Build, tag, and push NGINX Image to Amazon ECR
         id: build-nginx-image
         env:
@@ -119,7 +118,7 @@ jobs:
           container-name-nginx: ${{ env.CONTAINER_NAME_NGINX }}
           nginx-image: ${{ steps.build-image-nginx.outputs.image }}
           container-name-php: ${{ env.CONTAINER_NAME_PHP }}
-          nginx-image: ${{ steps.build-image-php.outputs.image }}
+          php-image: ${{ steps.build-image-php.outputs.image }}
       
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a

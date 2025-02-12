@@ -168,8 +168,9 @@ jobs:
 
           # Output the updated task definition as a single-line JSON string
           TASK_DEFINITION=$(jq -c . ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json)
+          cat $TASK_DEFINITION
           echo "task_definition=$TASK_DEFINITION" >> $GITHUB_OUTPUT
-          cat updated-task-definition.json
+        
 
       - name: Deploy Amazon ECS task definition
         # if: steps.check-changes.outputs.skip_build == 'false'

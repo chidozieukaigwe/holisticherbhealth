@@ -1,17 +1,24 @@
 services:
   server:
-    image: chidodesigns/holisticherbhealth-nginx
+    image: 503561432877.dkr.ecr.us-east-2.amazonaws.com/holisticherbhealth/nginx:latest
+    ports:
+      - "8000:80"
+      - "8443:443"
+    env_file:
+      - ./env/nginx.env
     depends_on:
       - php
       - mysql
   php:
-    image: chidodesigns/holisticherbhealth-php
+    image: 503561432877.dkr.ecr.us-east-2.amazonaws.com/holisticherbhealth/php:latest
+    env_file:
+      - ./src/.env.local
     depends_on:
       - mysql
   composer:
     image: chidodesigns/holisticherbhealth-composer
   artisan:
-    image: chidodesigns/holisticherbhealth-php
+    image: 503561432877.dkr.ecr.us-east-2.amazonaws.com/holisticherbhealth/php:latest
     entrypoint: ["php", "/var/www/html/artisan"]
   npm:
     image: node:22-alpine

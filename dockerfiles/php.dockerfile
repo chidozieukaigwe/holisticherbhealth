@@ -15,6 +15,7 @@ RUN apk update && apk add --no-cache \
     libjpeg-turbo-dev \
     libwebp-dev \
     zlib-dev \
+    dos2unix \
     libzip-dev
 
 # Install PHP extensions
@@ -22,7 +23,9 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Copy entrypoint script
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Convert line endings and set execute permissions
+RUN dos2unix /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 

@@ -14,8 +14,7 @@ env:
   ECS_TASK_DEFINITION: ./aws/dev-task-definition.json
   CONTAINER_NAME_NGINX: holisticherbhealth-server
   CONTAINER_NAME_PHP: holisticherbhealth-api
-  ACTIONS_STEP_DEBUG: true
-
+  
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -166,12 +165,24 @@ jobs:
           wait-for-service-stability: true
           force-new-deployment: true
 
-      - name: Check MySQL logs
+      # - name: Check MySQL logs
+      #   run: |
+      #     aws logs get-log-events \
+      #       --log-group-name /ecs/${{ env.ECS_CLUSTER }} \
+      #       --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
+      #       --output text
+
+      - name: Check if deployment was successful
+        id: check-deployment
         run: |
-          aws logs get-log-events \
-            --log-group-name /ecs/${{ env.ECS_CLUSTER }} \
-            --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
-            --output text
+          CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster ${{ env.CLUSTER_NAME }} --services ${{ matrix.service }} --query services[0].deployments[0].taskDefinition | jq -r ".")
+          NEW_TASK_DEF_ARN=${{ steps.ecs-deploy.outputs.task-definition-arn }}
+          echo "Current task arn: $CURRENT_TASK_DEF_ARN"
+          echo "New task arn: $NEW_TASK_DEF_ARN"
+          if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
+            echo "Deployment failed."
+            exit 1
+          fi
 
       # - name: Check ECS deployment status
       #   id: check-deployment

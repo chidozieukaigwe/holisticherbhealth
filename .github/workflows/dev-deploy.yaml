@@ -164,11 +164,10 @@ jobs:
             --arg php_image "${{ steps.build-php-image.outputs.php_image }}" \
             '.containerDefinitions[] |= (if .name == "${{ env.CONTAINER_NAME_NGINX }}" then .image = $nginx_image else . end) |
              .containerDefinitions[] |= (if .name == "${{ env.CONTAINER_NAME_PHP }}" then .image = $php_image else . end)' \
-             ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json > ${{ steps.temp-dir.outputs.temp_dir }}/temp.json && mv ${{ steps.temp-dir.outputs.temp_dir }}/temp.json ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json
+            ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json > ${{ steps.temp-dir.outputs.temp_dir }}/temp.json && mv ${{ steps.temp-dir.outputs.temp_dir }}/temp.json ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json
 
           # Output the updated task definition as a single-line JSON string
-          TASK_DEFINITION=$(jq -c . ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json)
-          echo "task_definition=$TASK_DEFINITION" >> $GITHUB_OUTPUT
+          echo "task_definition_file=${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json" >> $GITHUB_OUTPUT
         
 
       - name: Deploy Amazon ECS task definition

@@ -143,40 +143,65 @@ jobs:
       #     container-name-2: ${{ env.CONTAINER_NAME_PHP }}
       #     image-2: ${{ steps.build-php-image.outputs.image }}
 
-      - name: Create a temporary directory
-        id: temp-dir
-        run: |
-          TEMP_DIR=$(mktemp -d)
-          echo "temp_dir=$TEMP_DIR" >> $GITHUB_OUTPUT
+      # - name: Create a temporary directory
+      #   id: temp-dir
+      #   run: |
+      #     TEMP_DIR=$(mktemp -d)
+      #     echo "temp_dir=$TEMP_DIR" >> $GITHUB_OUTPUT
 
-      - name: Update ECS task definition with new images
-        id: update-task-def
-        run: |
-          # Install jq (JSON processor)
-          sudo apt-get install -y jq
+      # - name: Update ECS task definition with new images
+      #   id: update-task-def
+      #   run: |
+      #     # Install jq (JSON processor)
+      #     sudo apt-get install -y jq
 
-          # Copy the task definition to the temporary directory
-          cp ${{ env.ECS_TASK_DEFINITION }} ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json
+      #     # Copy the task definition to the temporary directory
+      #     cp ${{ env.ECS_TASK_DEFINITION }} ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json
 
-          # Update the task definition file with the new image URIs
-          jq \
-            --arg nginx_image "${{ steps.build-nginx-image.outputs.nginx_image }}" \
-            --arg php_image "${{ steps.build-php-image.outputs.php_image }}" \
-            '.containerDefinitions[] |= (if .name == "${{ env.CONTAINER_NAME_NGINX }}" then .image = $nginx_image else . end) |
-             .containerDefinitions[] |= (if .name == "${{ env.CONTAINER_NAME_PHP }}" then .image = $php_image else . end)' \
-            ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json > ${{ steps.temp-dir.outputs.temp_dir }}/temp.json && mv ${{ steps.temp-dir.outputs.temp_dir }}/temp.json ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json
+      #     # Update the task definition file with the new image URIs
+      #     jq \
+      #       --arg nginx_image "${{ steps.build-nginx-image.outputs.nginx_image }}" \
+      #       --arg php_image "${{ steps.build-php-image.outputs.php_image }}" \
+      #       '.containerDefinitions[] |= (if .name == "${{ env.CONTAINER_NAME_NGINX }}" then .image = $nginx_image else . end) |
+      #        .containerDefinitions[] |= (if .name == "${{ env.CONTAINER_NAME_PHP }}" then .image = $php_image else . end)' \
+      #       ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json > ${{ steps.temp-dir.outputs.temp_dir }}/temp.json && mv ${{ steps.temp-dir.outputs.temp_dir }}/temp.json ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json
 
-          # Output the updated task definition as a single-line JSON string
-          echo "task_definition_file=${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json" >> $GITHUB_OUTPUT
+      #     # Output the updated task definition as a single-line JSON string
+      #     echo "task_definition_file=${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json" >> $GITHUB_OUTPUT
         
+      - name: Render ECS task definition for NGINX
+        id: render-nginx-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME_NGINX }}
+          image: ${{ steps.build-nginx-image.outputs.nginx_image }}
+
+      - name: Render ECS task definition for PHP
+        id: render-php-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-nginx-task-def.outputs.task-definition }}
+          container-name: ${{ env.CONTAINER_NAME_PHP }}
+          image: ${{ steps.build-php-image.outputs.php_image }}
+
+      - name: Print updated task definition
+        run: cat ${{ steps.render-php-task-def.outputs.task-definition }}
+
+      - name: Print NGINX image URI
+        run: echo ${{ steps.build-nginx-image.outputs.nginx_image }}
+
+      - name: Print PHP image URI
+        run: echo ${{ steps.build-php-image.outputs.php_image }}
 
       - name: Deploy Amazon ECS task definition
         # if: steps.check-changes.outputs.skip_build == 'false'
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
+           task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
           # task-definition: ${{ steps.task-def.outputs.task-definition }}
           # task-definition: ${{ steps.update-task-def.outputs.task_definition }}
-          task-definition: ${{ steps.update-task-def.outputs.task_definition_file }}
+          # task-definition: ${{ steps.update-task-def.outputs.task_definition_file }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true

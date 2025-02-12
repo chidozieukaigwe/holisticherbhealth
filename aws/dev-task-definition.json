@@ -3,7 +3,7 @@
     "containerDefinitions": [
         {
             "name": "holisticherbhealth-api",
-            "image": "<php-image>",
+            "image": "<IMAGE_PHP>",
             "cpu": 0,
             "portMappings": [
                 {
@@ -75,7 +75,7 @@
         },
         {
             "name": "holisticherbhealth-server",
-            "image": "<nginx-image>",
+            "image": "<IMAGE_NGINX>",
             "cpu": 0,
             "portMappings": [
                 {

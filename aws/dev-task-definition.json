@@ -3,7 +3,7 @@
     "containerDefinitions": [
         {
             "name": "holisticherbhealth-api",
-            "image": "503561432877.dkr.ecr.us-east-2.amazonaws.com/holisticherbhealth/php:latest",
+            "image": "<php-image>",
             "cpu": 0,
             "portMappings": [
                 {
@@ -75,7 +75,7 @@
         },
         {
             "name": "holisticherbhealth-server",
-            "image": "503561432877.dkr.ecr.us-east-2.amazonaws.com/holisticherbhealth/nginx:latest",
+            "image": "<nginx-image>",
             "cpu": 0,
             "portMappings": [
                 {

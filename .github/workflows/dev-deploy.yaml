@@ -176,7 +176,7 @@ jobs:
         with:
           # task-definition: ${{ steps.task-def.outputs.task-definition }}
           # task-definition: ${{ steps.update-task-def.outputs.task_definition }}
-            task-definition: ${{ steps.update-task-def.outputs.task_definition_file }}
+          task-definition: ${{ steps.update-task-def.outputs.task_definition_file }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true

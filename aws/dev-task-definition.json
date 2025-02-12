@@ -1,0 +1,209 @@
+{
+    "family": "holisticherbhealth",
+    "containerDefinitions": [
+        {
+            "name": "holisticherbhealth-api",
+            "image": "503561432877.dkr.ecr.us-east-2.amazonaws.com/holisticherbhealth/php:latest",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "name": "holisticherbhealth-api-9000-tcp",
+                    "containerPort": 9000,
+                    "hostPort": 9000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+
+                {
+                    "name": "APP_NAME",
+                    "value": "holisticherbhealth"
+                },
+                {
+                    "name": "APP_ENV",
+                    "value": "testing"
+                },
+                {
+                    "name": "DB_CONNECTION",
+                    "value": "mysql"
+                },
+                {
+                    "name": "DB_USERNAME",
+                    "value": "holisticherbhealth_admin"
+                },
+                {
+                    "name": "DB_HOST",
+                    "value": "localhost:3306"
+                },
+                {
+                    "name": "DB_PORT",
+                    "value": "3306"
+                },
+                {
+                    "name": "DB_DATABASE",
+                    "value": "holisticherbhealth_api"
+                },
+                {
+                    "name": "DB_PASSWORD",
+                    "value": "secret"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "dependsOn": [
+                {
+                    "containerName": "holisticherbhealth-mysql",
+                    "condition": "START"
+                }
+            ],
+            "ulimits": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/holisticherbhealth",
+                    "mode": "non-blocking",
+                    "awslogs-create-group": "true",
+                    "max-buffer-size": "25m",
+                    "awslogs-region": "us-east-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
+        },
+        {
+            "name": "holisticherbhealth-server",
+            "image": "503561432877.dkr.ecr.us-east-2.amazonaws.com/holisticherbhealth/nginx:latest",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "name": "nginx-container-port-protocol",
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "BACKEND_SERVICE_HOST",
+                    "value": "localhost"
+                },
+                {
+                    "name": "HOSTNAME",
+                    "value": "localhost"
+                },
+                {
+                    "name": "BACKEND_SERVICE_PORT",
+                    "value": "9000"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "dependsOn": [
+                {
+                    "containerName": "holisticherbhealth-api",
+                    "condition": "START"
+                },
+                {
+                    "containerName": "holisticherbhealth-mysql",
+                    "condition": "START"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/holisticherbhealth",
+                    "mode": "non-blocking",
+                    "awslogs-create-group": "true",
+                    "max-buffer-size": "25m",
+                    "awslogs-region": "us-east-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
+        },
+        {
+            "name": "holisticherbhealth-mysql",
+            "image": "mysql:8.0",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "name": "holisticherbhealth-mysql-3306-tcp",
+                    "containerPort": 3306,
+                    "hostPort": 3306,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "MYSQL_DATABASE",
+                    "value": "holisticherbhealth_api"
+                },
+                {
+                    "name": "MYSQL_PASSWORD",
+                    "value": "secret"
+                },
+                {
+                    "name": "MYSQL_ROOT_PASSWORD",
+                    "value": "secret"
+                },
+                {
+                    "name": "MYSQL_USER",
+                    "value": "holisticherbhealth_admin"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [
+                {
+                    "sourceVolume": "mysqldata",
+                    "containerPath": "/var/lib/mysql",
+                    "readOnly": false
+                }
+            ],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/holisticherbhealth",
+                    "mode": "non-blocking",
+                    "awslogs-create-group": "true",
+                    "max-buffer-size": "25m",
+                    "awslogs-region": "us-east-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
+        }
+    ],
+    "taskRoleArn": "arn:aws:iam::503561432877:role/AmazonECSRole",
+    "executionRoleArn": "arn:aws:iam::503561432877:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "volumes": [
+        {
+            "name": "mysqldata",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-05eddbb026d540d2d",
+                "rootDirectory": "/"
+            }
+        }
+    ],
+    "placementConstraints": [],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "1024",
+    "memory": "3072",
+    "runtimePlatform": {
+        "cpuArchitecture": "ARM64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "enableFaultInjection": false
+}

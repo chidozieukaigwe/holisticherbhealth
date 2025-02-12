@@ -16,11 +16,4 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
     }
-
-    public function test_this_fails_on_purpose(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(400);
-    }
 }

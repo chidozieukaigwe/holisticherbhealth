@@ -131,44 +131,6 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG
           echo "php_image=$ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      # Test repeating this action again to inject container
-      # - name: Fill in the new image ID in the Amazon ECS task definition
-      #   # if: steps.check-changes.outputs.skip_build == 'false'
-      #   id: task-def
-      #   uses: aws-actions/amazon-ecs-render-task-definition@c804dfbdd57f713b6c079302a4c01db7017a36fc
-      #   with:
-      #     task-definition: ${{ env.ECS_TASK_DEFINITION }}
-      #     container-name: ${{ env.CONTAINER_NAME_NGINX }}
-      #     image: ${{ steps.build-nginx-image.outputs.image }}
-      #     container-name-2: ${{ env.CONTAINER_NAME_PHP }}
-      #     image-2: ${{ steps.build-php-image.outputs.image }}
-
-      # - name: Create a temporary directory
-      #   id: temp-dir
-      #   run: |
-      #     TEMP_DIR=$(mktemp -d)
-      #     echo "temp_dir=$TEMP_DIR" >> $GITHUB_OUTPUT
-
-      # - name: Update ECS task definition with new images
-      #   id: update-task-def
-      #   run: |
-      #     # Install jq (JSON processor)
-      #     sudo apt-get install -y jq
-
-      #     # Copy the task definition to the temporary directory
-      #     cp ${{ env.ECS_TASK_DEFINITION }} ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json
-
-      #     # Update the task definition file with the new image URIs
-      #     jq \
-      #       --arg nginx_image "${{ steps.build-nginx-image.outputs.nginx_image }}" \
-      #       --arg php_image "${{ steps.build-php-image.outputs.php_image }}" \
-      #       '.containerDefinitions[] |= (if .name == "${{ env.CONTAINER_NAME_NGINX }}" then .image = $nginx_image else . end) |
-      #        .containerDefinitions[] |= (if .name == "${{ env.CONTAINER_NAME_PHP }}" then .image = $php_image else . end)' \
-      #       ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json > ${{ steps.temp-dir.outputs.temp_dir }}/temp.json && mv ${{ steps.temp-dir.outputs.temp_dir }}/temp.json ${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json
-
-      #     # Output the updated task definition as a single-line JSON string
-      #     echo "task_definition_file=${{ steps.temp-dir.outputs.temp_dir }}/task-definition.json" >> $GITHUB_OUTPUT
-        
       - name: Render ECS task definition for NGINX
         id: render-nginx-task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -199,10 +161,32 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
-          # task-definition: ${{ steps.task-def.outputs.task-definition }}
-          # task-definition: ${{ steps.update-task-def.outputs.task_definition }}
-          # task-definition: ${{ steps.update-task-def.outputs.task_definition_file }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
           force-new-deployment: true
+
+      - name: Check ECS deployment status
+        id: check-deployment
+        run: |
+          # Get the latest deployment ID
+          DEPLOYMENT_ID=$(aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --query 'services[0].deployments[?status==`PRIMARY`].id' \
+            --output text)
+
+          # Get the deployment status
+          DEPLOYMENT_STATUS=$(aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --query 'services[0].deployments[?id==`'"$DEPLOYMENT_ID"'`].rolloutState' \
+            --output text)
+
+          # Fail the workflow if the deployment was rolled back
+          if [[ "$DEPLOYMENT_STATUS" == "FAILED" || "$DEPLOYMENT_STATUS" == "ROLLED_BACK" ]]; then
+            echo "ECS deployment failed or was rolled back. Failing the workflow."
+            exit 1
+          else
+            echo "ECS deployment succeeded."
+          fi

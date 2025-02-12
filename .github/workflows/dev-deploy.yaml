@@ -196,7 +196,7 @@ jobs:
 
       - name: Deploy Amazon ECS task definition
         # if: steps.check-changes.outputs.skip_build == 'false'
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
           # task-definition: ${{ steps.task-def.outputs.task-definition }}
@@ -205,3 +205,4 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+          force-new-deployment: true

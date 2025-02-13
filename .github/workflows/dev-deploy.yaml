@@ -155,6 +155,9 @@ jobs:
       - name: Print PHP image URI
         run: echo ${{ steps.build-php-image.outputs.php_image }}
 
+      - name: Print Task Definition Path 
+        run: echo "Task Definition Path: ${{ steps.render-php-task-def.outputs.task-definition }} "
+
       - name: Update ECS Service
         run: |
           aws ecs update-service \
@@ -173,7 +176,7 @@ jobs:
       #     wait-for-service-stability: true
       #     force-new-deployment: true
 
-
+    # ###### BELOW NEEDS TO BE REVIEWED ########
 
       # - name: Check MySQL logs
       #   run: |

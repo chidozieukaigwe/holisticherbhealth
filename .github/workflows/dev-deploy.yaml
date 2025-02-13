@@ -14,9 +14,7 @@ env:
   ECS_TASK_DEFINITION: ./aws/dev-task-definition.json
   CONTAINER_NAME_NGINX: holisticherbhealth-server
   CONTAINER_NAME_PHP: holisticherbhealth-api
-  CONTAINER_NAME_MYSQL: holisticherbhealth-mysql
-  MYSQL_IMAGE: mysql:8.0
-  
+    
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -73,7 +71,7 @@ jobs:
         id: run-tests
         working-directory: ./src
         run: composer run-tests
-
+# Add Caching
   aws:
     runs-on: ubuntu-latest
     steps:
@@ -148,16 +146,8 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME_PHP }}
           image: ${{ steps.build-php-image.outputs.php_image }}
 
-      # - name: Render ECS task definition for MYSQL
-      #   id: render-mysql-task-def
-      #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-      #   with:
-      #     task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
-      #     container-name: ${{ env.CONTAINER_NAME_MYSQL }}
-      #     image: ${{ env.MYSQL_IMAGE}}
-
       - name: Print updated task definition
-        run: cat ${{ steps.render-mysql-task-def.outputs.task-definition }}
+        run: cat ${{ steps.render-php-task-def.outputs.task-definition }}
 
       - name: Print NGINX image URI
         run: echo ${{ steps.build-nginx-image.outputs.nginx_image }}
@@ -193,13 +183,6 @@ jobs:
             --output table
 
     # ###### BELOW NEEDS TO BE REVIEWED ########
-
-      # - name: Check MySQL logs
-      #   run: |
-      #     aws logs get-log-events \
-      #       --log-group-name /ecs/${{ env.ECS_CLUSTER }} \
-      #       --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
-      #       --output text
 
       # - name: Check if deployment was successful
       #   id: check-deployment

@@ -62,7 +62,7 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/holisticherbhealth",
+                    "awslogs-group": "/ecs/holisticherbhealth/php",
                     "mode": "non-blocking",
                     "awslogs-create-group": "true",
                     "max-buffer-size": "25m",
@@ -117,7 +117,7 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/holisticherbhealth",
+                    "awslogs-group": "/ecs/holisticherbhealth/nginx",
                     "mode": "non-blocking",
                     "awslogs-create-group": "true",
                     "max-buffer-size": "25m",
@@ -131,8 +131,7 @@
         {
             "name": "holisticherbhealth-mysql",
             "image": "mysql:8.0",
-             "cpu": 2048,
-            "memory": 4096,
+             "cpu": 0,
             "portMappings": [
                 {
                     "name": "holisticherbhealth-mysql-3306-tcp",
@@ -168,20 +167,11 @@
                     "readOnly": false
                 }
             ],
-            "healthCheck": {
-                "command": [
-                    "CMD-SHELL",
-                    "mysqladmin ping -h localhost -u root -p$MYSQL_ROOT_PASSWORD"
-                ],
-                "interval": 30,
-                "timeout": 5,
-                "retries": 3
-            },
             "volumesFrom": [],
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/holisticherbhealth",
+                    "awslogs-group": "/ecs/holisticherbhealth/mysql",
                     "mode": "non-blocking",
                     "awslogs-create-group": "true",
                     "max-buffer-size": "25m",
@@ -209,8 +199,8 @@
     "requiresCompatibilities": [
         "FARGATE"
     ],
-    "cpu": "2048",
-    "memory": "4096",
+    "cpu": "1024",
+    "memory": "3072",
     "runtimePlatform": {
         "cpuArchitecture": "ARM64",
         "operatingSystemFamily": "LINUX"

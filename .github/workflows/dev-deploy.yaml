@@ -14,6 +14,9 @@ env:
   ECS_TASK_DEFINITION: ./aws/dev-task-definition.json
   CONTAINER_NAME_NGINX: holisticherbhealth-server
   CONTAINER_NAME_PHP: holisticherbhealth-api
+  LOG_GROUP_NGINX: /ecs/holisticherbhealth/nginx
+  LOG_GROUP_PHP: /ecs/holisticherbhealth/php
+  LOG_GROUP_MYSQL: /ecs/holisticherbhealth/mysql
 
 jobs:
   lint:
@@ -167,18 +170,27 @@ jobs:
         # if: steps.check-changes.outputs.skip_build == 'false'
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          # task-definition: ${{ steps.render-mysql-task-def.outputs.task-definition }}
           task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
           force-new-deployment: true
+          desired-count: 1
       
       - name: Check MySQL logs
         run: |
           aws logs get-log-events \
-            --log-group-name /ecs/holisticherbhealth/php \
+            --log-group-name /ecs/holisticherbhealth/mysql \
+            --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
             --output text
+
+      - name: Get ECS task logs
+        run: |
+          TASK_ID=$(aws ecs list-tasks \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service-name ${{ env.ECS_SERVICE }} \
+            --query 'taskArns[0]' \
+            --output text | awk -F/ '{print $NF}')
 
       - name: Check ECS service events
         run: |

@@ -89,7 +89,7 @@
                 "command": ["CMD", "curl", "-f", "http://localhost:8080/health"],
                 "interval": 5,
                 "timeout": 3,
-                "retries": 3,
+                "retries": 1,
                 "startPeriod": 0
             },
             "essential": true,
@@ -152,7 +152,7 @@
                 ],
                 "interval": 30,
                 "timeout": 5,
-                "retries": 3
+                "retries": 1
             },
             "essential": true,
             "environment": [

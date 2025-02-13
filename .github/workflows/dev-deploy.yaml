@@ -158,8 +158,8 @@ jobs:
       - name: Update ECS Service
         run: |
           aws ecs update-service \
-            --cluster my-cluster ${{ env.ECS_CLUSTER }} \
-            --service my-service ${{ env.ECS_SERVICE }} \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
             --task-definition ${{ steps.render-php-task-def.outputs.task-definition }} \
             --force-new-deployment
 

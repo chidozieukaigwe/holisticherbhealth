@@ -163,8 +163,7 @@
             "mountPoints": [
                 {
                     "sourceVolume": "mysqldata",
-                    "containerPath": "/var/lib/mysql",
-                    "readOnly": false
+                    "containerPath": "/var/lib/mysql"
                 }
             ],
             "volumesFrom": [],

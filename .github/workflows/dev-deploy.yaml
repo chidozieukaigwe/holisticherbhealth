@@ -15,6 +15,7 @@ env:
   CONTAINER_NAME_NGINX: holisticherbhealth-server
   CONTAINER_NAME_PHP: holisticherbhealth-api
   CONTAINER_NAME_MYSQL: holisticherbhealth-mysql
+  MYSQL_IMAGE: mysql:8.0
   
 jobs:
   lint:
@@ -153,8 +154,7 @@ jobs:
         with:
           task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
           container-name: ${{ env.CONTAINER_NAME_MYSQL }}
-          memory: 4096  # Set memory limit to 4096 MB
-          cpu: 2048     # Set CPU limit to 2048 units
+          image: ${{ env.MYSQL_IMAGE}}
 
       - name: Print updated task definition
         run: cat ${{ steps.render-mysql-task-def.outputs.task-definition }}

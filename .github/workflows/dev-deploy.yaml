@@ -173,6 +173,14 @@ jobs:
       #       --task-definition ${{ steps.render-php-task-def.outputs.task-definition }} \
       #       --force-new-deployment
 
+      - name: Check ECS service events
+        run: |
+          aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --query 'services[0].events' \
+            --output table
+
       - name: Deploy Amazon ECS task definition
         # if: steps.check-changes.outputs.skip_build == 'false'
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2

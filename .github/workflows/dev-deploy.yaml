@@ -177,8 +177,7 @@ jobs:
       - name: Check MySQL logs
         run: |
           aws logs get-log-events \
-            --log-group-name /ecs/${{ env.ECS_CLUSTER }} \
-            --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
+            --log-group-name /ecs/holisticherbhealth/php \
             --output text
 
       - name: Check ECS service events

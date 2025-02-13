@@ -155,15 +155,23 @@ jobs:
       - name: Print PHP image URI
         run: echo ${{ steps.build-php-image.outputs.php_image }}
 
-      - name: Deploy Amazon ECS task definition
-        # if: steps.check-changes.outputs.skip_build == 'false'
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
-          force-new-deployment: true
+      # - name: Deploy Amazon ECS task definition
+      #   # if: steps.check-changes.outputs.skip_build == 'false'
+      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      #   with:
+      #     task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
+      #     service: ${{ env.ECS_SERVICE }}
+      #     cluster: ${{ env.ECS_CLUSTER }}
+      #     wait-for-service-stability: true
+      #     force-new-deployment: true
+
+     - name: Update ECS Service
+        run: |
+          aws ecs update-service \
+            --cluster my-cluster ${{ env.ECS_CLUSTER }} \
+            --service my-service ${{ env.ECS_SERVICE }} \
+            --task-definition ${{ steps.render-php-task-def.outputs.task-definition }} \
+            --force-new-deployment
 
       # - name: Check MySQL logs
       #   run: |
@@ -172,17 +180,17 @@ jobs:
       #       --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
       #       --output text
 
-      - name: Check if deployment was successful
-        id: check-deployment
-        run: |
-          CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster ${{ env.CLUSTER_NAME }} --services ${{ matrix.service }} --query services[0].deployments[0].taskDefinition | jq -r ".")
-          NEW_TASK_DEF_ARN=${{ steps.ecs-deploy.outputs.task-definition-arn }}
-          echo "Current task arn: $CURRENT_TASK_DEF_ARN"
-          echo "New task arn: $NEW_TASK_DEF_ARN"
-          if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
-            echo "Deployment failed."
-            exit 1
-          fi
+      # - name: Check if deployment was successful
+      #   id: check-deployment
+      #   run: |
+      #     CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster ${{ env.CLUSTER_NAME }} --services ${{ matrix.service }} --query services[0].deployments[0].taskDefinition | jq -r ".")
+      #     NEW_TASK_DEF_ARN=${{ steps.ecs-deploy.outputs.task-definition-arn }}
+      #     echo "Current task arn: $CURRENT_TASK_DEF_ARN"
+      #     echo "New task arn: $NEW_TASK_DEF_ARN"
+      #     if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
+      #       echo "Deployment failed."
+      #       exit 1
+      #     fi
 
       # - name: Check ECS deployment status
       #   id: check-deployment

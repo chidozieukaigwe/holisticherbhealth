@@ -174,6 +174,13 @@ jobs:
           wait-for-service-stability: true
           force-new-deployment: true
       
+      - name: Check MySQL logs
+        run: |
+          aws logs get-log-events \
+            --log-group-name /ecs/${{ env.ECS_CLUSTER }} \
+            --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
+            --output text
+
       - name: Check ECS service events
         run: |
           aws ecs describe-services \
@@ -220,10 +227,3 @@ jobs:
       #     else
       #       echo "ECS deployment succeeded."
       #     fi
-
-      #  - name: Check MySQL logs
-      #   run: |
-      #     aws logs get-log-events \
-      #       --log-group-name /ecs/${{ env.ECS_CLUSTER }} \
-      #       --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
-      #       --output text

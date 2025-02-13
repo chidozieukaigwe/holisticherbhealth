@@ -64,7 +64,7 @@
                 "options": {
                     "awslogs-group": "/ecs/holisticherbhealth/php",
                     "mode": "non-blocking",
-                    "awslogs-create-group": "true",
+                    "awslogs-create-group": "false",
                     "max-buffer-size": "25m",
                     "awslogs-region": "us-east-2",
                     "awslogs-stream-prefix": "ecs"
@@ -119,7 +119,7 @@
                 "options": {
                     "awslogs-group": "/ecs/holisticherbhealth/nginx",
                     "mode": "non-blocking",
-                    "awslogs-create-group": "true",
+                    "awslogs-create-group": "false",
                     "max-buffer-size": "25m",
                     "awslogs-region": "us-east-2",
                     "awslogs-stream-prefix": "ecs"
@@ -173,7 +173,7 @@
                 "options": {
                     "awslogs-group": "/ecs/holisticherbhealth/mysql",
                     "mode": "non-blocking",
-                    "awslogs-create-group": "true",
+                    "awslogs-create-group": "false",
                     "max-buffer-size": "25m",
                     "awslogs-region": "us-east-2",
                     "awslogs-stream-prefix": "ecs"

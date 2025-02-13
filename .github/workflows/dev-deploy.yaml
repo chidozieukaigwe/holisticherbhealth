@@ -158,6 +158,9 @@ jobs:
       - name: Print Task Definition Path 
         run: echo ${{ steps.render-php-task-def.outputs.task-definition }} 
 
+      - name: Print Task Definition Path 
+        run: cat ${{ steps.render-php-task-def.outputs.task-definition }} 
+
       - name: Update ECS Service
         run: |
           aws ecs update-service \

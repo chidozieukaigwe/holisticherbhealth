@@ -156,7 +156,7 @@ jobs:
         run: echo ${{ steps.build-php-image.outputs.php_image }}
 
       - name: Print Task Definition Path 
-        run: echo "Task Definition Path: ${{ steps.render-php-task-def.outputs.task-definition }} "
+        run: echo ${{ steps.render-php-task-def.outputs.task-definition }} 
 
       - name: Update ECS Service
         run: |

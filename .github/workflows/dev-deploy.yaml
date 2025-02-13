@@ -155,6 +155,14 @@ jobs:
       - name: Print PHP image URI
         run: echo ${{ steps.build-php-image.outputs.php_image }}
 
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service \
+            --cluster my-cluster ${{ env.ECS_CLUSTER }} \
+            --service my-service ${{ env.ECS_SERVICE }} \
+            --task-definition ${{ steps.render-php-task-def.outputs.task-definition }} \
+            --force-new-deployment
+
       # - name: Deploy Amazon ECS task definition
       #   # if: steps.check-changes.outputs.skip_build == 'false'
       #   uses: aws-actions/amazon-ecs-deploy-task-definition@v2
@@ -165,13 +173,7 @@ jobs:
       #     wait-for-service-stability: true
       #     force-new-deployment: true
 
-     - name: Update ECS Service
-        run: |
-          aws ecs update-service \
-            --cluster my-cluster ${{ env.ECS_CLUSTER }} \
-            --service my-service ${{ env.ECS_SERVICE }} \
-            --task-definition ${{ steps.render-php-task-def.outputs.task-definition }} \
-            --force-new-deployment
+
 
       # - name: Check MySQL logs
       #   run: |

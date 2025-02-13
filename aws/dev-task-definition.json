@@ -168,6 +168,15 @@
                     "readOnly": false
                 }
             ],
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "mysqladmin ping -h localhost -u root -p$MYSQL_ROOT_PASSWORD"
+                ],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3
+            },
             "volumesFrom": [],
             "logConfiguration": {
                 "logDriver": "awslogs",

@@ -148,13 +148,13 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME_PHP }}
           image: ${{ steps.build-php-image.outputs.php_image }}
 
-      - name: Render ECS task definition for MYSQL
-        id: render-mysql-task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
-          container-name: ${{ env.CONTAINER_NAME_MYSQL }}
-          image: ${{ env.MYSQL_IMAGE}}
+      # - name: Render ECS task definition for MYSQL
+      #   id: render-mysql-task-def
+      #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+      #   with:
+      #     task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
+      #     container-name: ${{ env.CONTAINER_NAME_MYSQL }}
+      #     image: ${{ env.MYSQL_IMAGE}}
 
       - name: Print updated task definition
         run: cat ${{ steps.render-mysql-task-def.outputs.task-definition }}
@@ -173,6 +173,17 @@ jobs:
       #       --task-definition ${{ steps.render-php-task-def.outputs.task-definition }} \
       #       --force-new-deployment
 
+      - name: Deploy Amazon ECS task definition
+        # if: steps.check-changes.outputs.skip_build == 'false'
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          # task-definition: ${{ steps.render-mysql-task-def.outputs.task-definition }}
+          task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          force-new-deployment: true
+
       - name: Check ECS service events
         run: |
           aws ecs describe-services \
@@ -180,16 +191,6 @@ jobs:
             --services ${{ env.ECS_SERVICE }} \
             --query 'services[0].events' \
             --output table
-
-      - name: Deploy Amazon ECS task definition
-        # if: steps.check-changes.outputs.skip_build == 'false'
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: ${{ steps.render-mysql-task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
-          force-new-deployment: true
 
     # ###### BELOW NEEDS TO BE REVIEWED ########
 

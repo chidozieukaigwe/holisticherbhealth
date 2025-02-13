@@ -131,7 +131,8 @@
         {
             "name": "holisticherbhealth-mysql",
             "image": "mysql:8.0",
-            "cpu": 0,
+            "memory": 2048,
+            "cpu": 2048 ,
             "portMappings": [
                 {
                     "name": "holisticherbhealth-mysql-3306-tcp",
@@ -163,7 +164,8 @@
             "mountPoints": [
                 {
                     "sourceVolume": "mysqldata",
-                    "containerPath": "/var/lib/mysql"
+                    "containerPath": "/var/lib/mysql",
+                    "readOnly": false
                 }
             ],
             "volumesFrom": [],

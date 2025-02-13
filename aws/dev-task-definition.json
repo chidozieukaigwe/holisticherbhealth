@@ -131,8 +131,8 @@
         {
             "name": "holisticherbhealth-mysql",
             "image": "mysql:8.0",
-            "cpu": "2048",
-            "memory": "4096",
+             "cpu": 2048,
+            "memory": 4096,
             "portMappings": [
                 {
                     "name": "holisticherbhealth-mysql-3306-tcp",

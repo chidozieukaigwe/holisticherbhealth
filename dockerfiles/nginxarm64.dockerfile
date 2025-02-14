@@ -13,8 +13,7 @@ COPY nginx/nginx.conf.template /etc/nginx/templates/default.conf.template
 # RUN apt-get install -y --no-install-recommends gettext 
 
 # Install Nginx
-RUN apk update && \
-    apk add --no-cache \ 
+RUN apk update && apk add --no-cache \ 
     nginx \
     gettext
 

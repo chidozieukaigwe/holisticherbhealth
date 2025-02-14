@@ -21,8 +21,7 @@ WORKDIR /var/www/html
 #     dos2unix \
 #     libzip-dev
 
-RUN apk update && \
-    apk add --no-cache \
+RUN apk update && apk add --no-cache \
         php82 \
         php82-common \
         php82-fpm \

@@ -126,7 +126,7 @@ jobs:
           IMAGE_TAG=$(echo "$IMAGE_DETAILS" | jq -r '.imageTags[0]')
           echo "Extracted image tags: $IMAGE_TAG"
           # Store the current PHP Image Tag in a GitHub Actions output variable
-          echo "php_current_image_tag=$ECR_REGISTRY/$ECR_PHP_REPOSITORY/$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "php_current_image_tag=$ECR_REGISTRY/$ECR_PHP_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Display Current PHP Image Tags
         if: steps.check-changes.outputs.skip_build == 'true'
@@ -157,7 +157,7 @@ jobs:
           IMAGE_TAG=$(echo "$IMAGE_DETAILS" | jq -r '.imageTags[0]')
           echo "Extracted image tags: $IMAGE_TAG"
           # Store the current NGINX Image Tag in a GitHub Actions output variable
-          echo "nginx_current_image_tag=$ECR_REGISTRY/$ECR_NGINX_REPOSITORY/$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "nginx_current_image_tag=$ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Display Current NGINX Image Tags
         if: steps.check-changes.outputs.skip_build == 'true'

@@ -14,7 +14,7 @@ env:
   ECS_TASK_DEFINITION: ./aws/dev-task-definition.json
   CONTAINER_NAME_NGINX: holisticherbhealth-server
   CONTAINER_NAME_PHP: holisticherbhealth-api
- 
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -112,8 +112,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          # docker build  -t $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG -f ./dockerfiles/nginx.dockerfile .
-          docker build --platform linux/arm64  -t $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG -f ./dockerfiles/nginxarm64.dockerfile .
+          docker build -t $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG -f ./dockerfiles/nginx.dockerfile .
           docker push $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG
           echo "nginx_image=$ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG" >> $GITHUB_OUTPUT
 
@@ -127,8 +126,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          # docker build  -t $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG -f ./dockerfiles/php.dockerfile .
-          docker build --platform linux/arm64 -t $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG -f ./dockerfiles/phparm64.dockerfile .
+          docker build -t $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG -f ./dockerfiles/php.dockerfile .
           docker push $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG
           echo "php_image=$ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG" >> $GITHUB_OUTPUT
 

@@ -16,3 +16,4 @@ src/.env
 src/.env.local
 aws
 .github
+dummy-dev-task-definition.json

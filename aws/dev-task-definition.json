@@ -55,7 +55,7 @@
             "dependsOn": [
                 {
                     "containerName": "holisticherbhealth-mysql",
-                    "condition": "HEALTHY"
+                    "condition": "START"
                 }
             ],
             "ulimits": [],
@@ -85,13 +85,6 @@
                     "appProtocol": "http"
                 }
             ],
-            "healthCheck": {
-                "command": ["CMD", "curl", "-f", "http://localhost:8080/health"],
-                "interval": 5,
-                "timeout": 3,
-                "retries": 1,
-                "startPeriod": 0
-            },
             "essential": true,
             "environment": [
                 {
@@ -145,15 +138,6 @@
                     "protocol": "tcp"
                 }
             ],
-            "healthCheck": {
-                "command": [
-                    "CMD-SHELL",
-                    "mysqladmin ping -h localhost -u root -p$MYSQL_ROOT_PASSWORD"
-                ],
-                "interval": 30,
-                "timeout": 5,
-                "retries": 1
-            },
             "essential": true,
             "environment": [
                 {

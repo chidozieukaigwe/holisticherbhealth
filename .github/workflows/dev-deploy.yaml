@@ -14,10 +14,7 @@ env:
   ECS_TASK_DEFINITION: ./aws/dev-task-definition.json
   CONTAINER_NAME_NGINX: holisticherbhealth-server
   CONTAINER_NAME_PHP: holisticherbhealth-api
-  LOG_GROUP_NGINX: /ecs/holisticherbhealth/nginx
-  LOG_GROUP_PHP: /ecs/holisticherbhealth/php
-  LOG_GROUP_MYSQL: /ecs/holisticherbhealth/mysql
-
+ 
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -115,7 +112,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG -f ./dockerfiles/nginx.dockerfile .
+          docker build --platform linux/arm64  -t $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG -f ./dockerfiles/nginx.dockerfile .
           docker push $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG
           echo "nginx_image=$ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG" >> $GITHUB_OUTPUT
 
@@ -129,7 +126,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG -f ./dockerfiles/php.dockerfile .
+          docker build --platform linux/arm64 -t $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG -f ./dockerfiles/php.dockerfile .
           docker push $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG
           echo "php_image=$ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG" >> $GITHUB_OUTPUT
 
@@ -177,28 +174,28 @@ jobs:
           force-new-deployment: true
           desired-count: 1
       
-      - name: Check MySQL logs
-        run: |
-          aws logs get-log-events \
-            --log-group-name /ecs/holisticherbhealth/mysql \
-            --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
-            --output text
+      # - name: Check MySQL logs
+      #   run: |
+      #     aws logs get-log-events \
+      #       --log-group-name /ecs/holisticherbhealth/ \
+      #       --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
+      #       --output text
 
-      - name: Get ECS task logs
-        run: |
-          TASK_ID=$(aws ecs list-tasks \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service-name ${{ env.ECS_SERVICE }} \
-            --query 'taskArns[0]' \
-            --output text | awk -F/ '{print $NF}')
+      # - name: Get ECS task logs
+      #   run: |
+      #     TASK_ID=$(aws ecs list-tasks \
+      #       --cluster ${{ env.ECS_CLUSTER }} \
+      #       --service-name ${{ env.ECS_SERVICE }} \
+      #       --query 'taskArns[0]' \
+      #       --output text | awk -F/ '{print $NF}')
 
-      - name: Check ECS service events
-        run: |
-          aws ecs describe-services \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --services ${{ env.ECS_SERVICE }} \
-            --query 'services[0].events' \
-            --output table
+      # - name: Check ECS service events
+      #   run: |
+      #     aws ecs describe-services \
+      #       --cluster ${{ env.ECS_CLUSTER }} \
+      #       --services ${{ env.ECS_SERVICE }} \
+      #       --query 'services[0].events' \
+      #       --output table
 
     # ###### BELOW NEEDS TO BE REVIEWED ########
 

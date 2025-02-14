@@ -1,5 +1,5 @@
-# FROM nginx:latest
-FROM arm64v8/nginx
+FROM nginx:latest
+# FROM arm64v8/nginx
 
 WORKDIR /etc/nginx/conf.d
 
@@ -10,7 +10,9 @@ WORKDIR /etc/nginx/conf.d
 COPY nginx/nginx.conf.template /etc/nginx/templates/default.conf.template
 
 # Install envsubst 
-RUN apt-get update && apt-get install -y --no-install-recommends gettext 
+RUN rm -rf /var/lib/apt/lists/* && apt-get clean
+RUN apt-get update 
+RUN apt-get install -y --no-install-recommends gettext 
 
  RUN envsubst < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
 

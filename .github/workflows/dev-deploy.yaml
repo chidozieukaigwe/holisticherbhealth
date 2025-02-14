@@ -102,29 +102,14 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Get Current Service Revision
-        id: get_current_revision
+      - name: Describe The Currently Running Images
+        id: describe-current-images
         run: |
-          CURRENT_SERVICE_REVISION=$(aws ecs describe-services \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.ECS_SERVICE }} \
-            --query 'services[].deployments[0].revision')
-          echo "Current Service Revision: $CURRENT_SERVICE_REVISION"
-
-      - name: Render Current Service Revision
-        run: echo $CURRENT_SERVICE_REVISION
-
-      - name: Get Previous Task Definition
-        id: get_previous_task_definition
-        run: |
-          aws ecs describe-services \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.ECS_SERVICE }} \
-            --query 'services[].deployments[1].taskDefinition' \
-            --output text
-
-      - name: Print updated task definition
-        run: cat ${{ steps.get_previous_task_definition.outputs.task-definition }}
+          IMAGE_DETAILS=$(aws ecr describe-images \
+            --repository-name ${{ secrets.ECR_PHP_REPOSITORY }} \
+            --query 'sort_by(imageDetails,&imagePushedAt)[-1]')
+          echo "Current PHP Image details: $IMAGE_DETAILS"
+          echo "current_php_image=$IMAGE_DETAILS" >> $GITHUB_OUTPUT
 
       - name: Build, tag, and push NGINX Image to Amazon ECR
         if: steps.check-changes.outputs.skip_build == 'false'

@@ -249,7 +249,7 @@ jobs:
           image: $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG
 
       - name: Print updated task definition
-          run: cat ${{ steps.render-php-task-def.outputs.task-definition }}
+        run: cat ${{ steps.render-php-task-def.outputs.task-definition }}
 
 
     # Deploy To ECS

@@ -81,7 +81,7 @@ jobs:
       - name: Check for changes in Dockerfile or source code
         id: check-changes
         run: |
-          if git diff --quiet HEAD^ HEAD -- ./dockerfiles src/; then
+          if git diff --quiet HEAD^ HEAD -- ./dockerfiles/.nginx.dockerfile ./dockerfiles/.php.dockerfile  src/; then
             echo "No changes detected in Dockerfile or source code."
             echo "skip_build=true" >> $GITHUB_OUTPUT
           else
@@ -90,7 +90,7 @@ jobs:
           fi
 
       - name: Configure AWS credentials
-        # if: steps.check-changes.outputs.skip_build == 'false'
+        if: steps.check-changes.outputs.skip_build == 'false'
         uses: aws-actions/configure-aws-credentials@0e613a0980cbf65ed5b322eb7a1e075d28913a83
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -98,12 +98,12 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        # if: steps.check-changes.outputs.skip_build == 'false'
+        if: steps.check-changes.outputs.skip_build == 'false'
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push NGINX Image to Amazon ECR
-        # if: steps.check-changes.outputs.skip_build == 'false'
+        if: steps.check-changes.outputs.skip_build == 'false'
         id: build-nginx-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -117,7 +117,7 @@ jobs:
           echo "nginx_image=$ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Build, tag, and push PHP Image to Amazon ECR
-        # if: steps.check-changes.outputs.skip_build == 'false'
+        if: steps.check-changes.outputs.skip_build == 'false'
         id: build-php-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -155,16 +155,8 @@ jobs:
       - name: Print PHP image URI
         run: echo ${{ steps.build-php-image.outputs.php_image }}
 
-      # - name: Update ECS Service
-      #   run: |
-      #     aws ecs update-service \
-      #       --cluster ${{ env.ECS_CLUSTER }} \
-      #       --service ${{ env.ECS_SERVICE }} \
-      #       --task-definition ${{ steps.render-php-task-def.outputs.task-definition }} \
-      #       --force-new-deployment
-
       - name: Deploy Amazon ECS task definition
-        # if: steps.check-changes.outputs.skip_build == 'false'
+        if: steps.check-changes.outputs.skip_build == 'false'
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
@@ -174,29 +166,7 @@ jobs:
           force-new-deployment: true
           desired-count: 1
       
-      # - name: Check MySQL logs
-      #   run: |
-      #     aws logs get-log-events \
-      #       --log-group-name /ecs/holisticherbhealth/ \
-      #       --log-stream-name ${{ env.ECS_SERVICE }}/mysql \
-      #       --output text
-
-      # - name: Get ECS task logs
-      #   run: |
-      #     TASK_ID=$(aws ecs list-tasks \
-      #       --cluster ${{ env.ECS_CLUSTER }} \
-      #       --service-name ${{ env.ECS_SERVICE }} \
-      #       --query 'taskArns[0]' \
-      #       --output text | awk -F/ '{print $NF}')
-
-      # - name: Check ECS service events
-      #   run: |
-      #     aws ecs describe-services \
-      #       --cluster ${{ env.ECS_CLUSTER }} \
-      #       --services ${{ env.ECS_SERVICE }} \
-      #       --query 'services[0].events' \
-      #       --output table
-
+     
     # ###### BELOW NEEDS TO BE REVIEWED ########
 
       # - name: Check if deployment was successful

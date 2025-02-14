@@ -226,7 +226,7 @@ jobs:
     # If 'skip_build' is true then render task defs without new image tags
       - name: Render ECS task definition for NGINX without new image tag 
         if: steps.check-changes.outputs.skip_build == 'true'
-        id: render-nginx-task-def
+        id: render-unchanged-nginx-task-def
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           NGINX_IMAGE_TAG: ${{ steps.extract-current-nginx-image-tag.outputs.nginx_current_image_tag }}
@@ -238,13 +238,13 @@ jobs:
 
       - name: Render ECS task definition for PHP
         if: steps.check-changes.outputs.skip_build == 'true'
-        id: render-php-task-def
+        id: render-unchanged-php-task-def
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           PHP_IMAGE_TAG: ${{ steps.extract-current-php-image-tag.outputs.php_current_image_tag }}
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ steps.render-nginx-task-def.outputs.task-definition }}
+          task-definition: ${{ steps.render-unchanged-nginx-task-def.outputs.task-definition }}
           container-name: ${{ env.CONTAINER_NAME_PHP }}
           image: $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG
 

@@ -1,11 +1,6 @@
 FROM nginx:latest
-# FROM arm64v8/nginx
 
 WORKDIR /etc/nginx/conf.d
-
-# COPY nginx/nginx.conf .
-
-# RUN mv nginx.conf default.conf
 
 COPY nginx/nginx.conf.template /etc/nginx/templates/default.conf.template
 

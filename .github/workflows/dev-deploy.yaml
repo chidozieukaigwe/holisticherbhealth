@@ -224,29 +224,29 @@ jobs:
 
 
     # If 'skip_build' is true then render task defs without new image tags
-      # - name: Render ECS task definition for NGINX without new image tag 
-      #   if: steps.check-changes.outputs.skip_build == 'true'
-      #   id: render-nginx-task-def
-      #   env:
-      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     NGINX_IMAGE_TAG: ${{ steps.extract-current-nginx-image-tag.outputs.nginx_current_image_tag }}
-      #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-      #   with:
-      #     task-definition: ${{ env.ECS_TASK_DEFINITION }}
-      #     container-name: ${{ env.CONTAINER_NAME_NGINX }}
-      #     image: $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG
+      - name: Render ECS task definition for NGINX without new image tag 
+        if: steps.check-changes.outputs.skip_build == 'true'
+        id: render-nginx-task-def
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          NGINX_IMAGE_TAG: ${{ steps.extract-current-nginx-image-tag.outputs.nginx_current_image_tag }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME_NGINX }}
+          image: $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG
 
-      # - name: Render ECS task definition for PHP
-      #   if: steps.check-changes.outputs.skip_build == 'true'
-      #   id: render-php-task-def
-      #   env:
-      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     PHP_IMAGE_TAG: ${{ steps.extract-current-php-image-tag.outputs.php_current_image_tag }}
-      #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-      #   with:
-      #     task-definition: ${{ steps.render-nginx-task-def.outputs.task-definition }}
-      #     container-name: ${{ env.CONTAINER_NAME_PHP }}
-      #     image: $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG
+      - name: Render ECS task definition for PHP
+        if: steps.check-changes.outputs.skip_build == 'true'
+        id: render-php-task-def
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          PHP_IMAGE_TAG: ${{ steps.extract-current-php-image-tag.outputs.php_current_image_tag }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-nginx-task-def.outputs.task-definition }}
+          container-name: ${{ env.CONTAINER_NAME_PHP }}
+          image: $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG
 
       - name: Print updated task definition
         run: cat ${{ steps.render-php-task-def.outputs.task-definition }}

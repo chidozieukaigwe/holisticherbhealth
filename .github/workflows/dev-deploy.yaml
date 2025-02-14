@@ -81,7 +81,7 @@ jobs:
       - name: Check for changes in Dockerfile or source code
         id: check-changes
         run: |
-          if git diff --quiet HEAD^ HEAD -- ./dockerfiles/.nginx.dockerfile ./dockerfiles/.php.dockerfile  src/; then
+          if git diff --quiet HEAD^ HEAD -- src/; then
             echo "No changes detected in Dockerfile or source code."
             echo "skip_build=true" >> $GITHUB_OUTPUT
           else
@@ -147,16 +147,18 @@ jobs:
           image: ${{ steps.build-php-image.outputs.php_image }}
 
       - name: Print updated task definition
+        if: steps.check-changes.outputs.skip_build == 'false'
         run: cat ${{ steps.render-php-task-def.outputs.task-definition }}
 
       - name: Print NGINX image URI
+        if: steps.check-changes.outputs.skip_build == 'false'
         run: echo ${{ steps.build-nginx-image.outputs.nginx_image }}
 
       - name: Print PHP image URI
+        if: steps.check-changes.outputs.skip_build == 'false'
         run: echo ${{ steps.build-php-image.outputs.php_image }}
 
       - name: Deploy Amazon ECS task definition
-        if: steps.check-changes.outputs.skip_build == 'false'
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}

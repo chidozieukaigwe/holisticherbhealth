@@ -108,7 +108,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           IMAGE_DETAILS=$(aws ecr describe-images \
-            --repository-name $ECR_REGISTRY/$ECR_PHP_REPOSITORY \
+            --repository-name $ECR_PHP_REPOSITORY \
             --query 'sort_by(imageDetails,&imagePushedAt)[-1]')
           echo "Current PHP Image details: $IMAGE_DETAILS"
           echo "current_php_image=$IMAGE_DETAILS" >> $GITHUB_OUTPUT

@@ -77,7 +77,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+      # @TODO: ADD dockerfiles check
       - name: Check for changes in Dockerfile or source code
         id: check-changes
         run: |
@@ -110,7 +110,7 @@ jobs:
           IMAGE_DETAILS=$(aws ecr describe-images \
             --repository-name $ECR_PHP_REPOSITORY \
             --query 'sort_by(imageDetails,&imagePushedAt)[-1]')
-          echo "Current PHP Image details: $IMAGE_DETAILS"
+          echo "Current PHP Image details: $IMAGE_DETAILS.imageTags"
           echo "current_php_image=$IMAGE_DETAILS" >> $GITHUB_OUTPUT
 
       - name: Build, tag, and push NGINX Image to Amazon ECR

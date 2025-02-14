@@ -1,5 +1,5 @@
-FROM nginx:latest
-# FROM arm64v8/nginx
+# FROM nginx:latest
+FROM arm64v8/nginx
 
 WORKDIR /etc/nginx/conf.d
 

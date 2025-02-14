@@ -81,7 +81,7 @@ jobs:
       - name: Check for changes in Dockerfile or source code
         id: check-changes
         run: |
-          if git diff --quiet HEAD^ HEAD -- src/; then
+          if git diff --quiet HEAD^ HEAD -- ../src/; then
             echo "No changes detected in Dockerfile or source code."
             echo "skip_build=true" >> $GITHUB_OUTPUT
           else

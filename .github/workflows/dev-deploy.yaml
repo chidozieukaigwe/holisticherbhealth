@@ -77,11 +77,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      # @TODO: ADD dockerfiles check
+      # We check if PHP || NGINX dockerfiles have been updated - or the src files have been updated - we create a new image if so
       - name: Check for changes in Dockerfile or source code
         id: check-changes
         run: |
-          if git diff --quiet origin/develop HEAD -- ./src/; then
+          if git diff --quiet origin/develop HEAD -- ./dockerfiles/nginx.dockerfile ./dockerfiles/php.dockerfile ./src/; then
             echo "No changes detected in Dockerfile or source code."
             echo "skip_build=true" >> $GITHUB_OUTPUT
           else
@@ -100,7 +100,9 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      # PHP Current Image Tag
       - name: Describe The Currently Running PHP Image
+        if: steps.check-changes.outputs.skip_build == 'true'
         id: describe-current-php-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -111,20 +113,55 @@ jobs:
           echo "Current PHP Image details: $IMAGE_DETAILS"
           echo "current_php_image=$(echo "$IMAGE_DETAILS" | jq -c .)" >> $GITHUB_OUTPUT
 
-      - name: Extract image tags
-        id: extract-image-tags
+      - name: Extract Current PHP Image
+        if: steps.check-changes.outputs.skip_build == 'true'
+        id: extract-current-php-image-tag
         run: |
           # Retrieve the JSON output from the previous step
           IMAGE_DETAILS='${{ steps.describe-current-php-image.outputs.current_php_image }}'
           # Extract image tags using jq
           IMAGE_TAGS=$(echo "$IMAGE_DETAILS" | jq -r '.imageTags[0]')
           echo "Extracted image tags: $IMAGE_TAGS"
-          # Store the tags in a GitHub Actions output variable
-          echo "php_image_tags=$IMAGE_TAGS" >> $GITHUB_OUTPUT
+          # Store the current PHP Image Tag in a GitHub Actions output variable
+          echo "php_current_image_tag=$IMAGE_TAGS" >> $GITHUB_OUTPUT
 
       - name: Display Current PHP Image Tags
+        if: steps.check-changes.outputs.skip_build == 'true'
         run: |
-          echo "Current PHP Image Tags: ${{ steps.extract-image-tags.outputs.php_image_tags }}"
+          echo "Current PHP Image Tags: ${{ steps.extract-current-php-image-tag.outputs.php_current_image_tag }}"
+
+      # Nginx Current Image Tag
+
+      - name: Describe The Currently Running NGINX Image
+        if: steps.check-changes.outputs.skip_build == 'true'
+        id: describe-current-nginx-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          IMAGE_DETAILS=$(aws ecr describe-images \
+            --repository-name $ECR_NGINX_REPOSITORY \
+            --query 'sort_by(imageDetails,&imagePushedAt)[-1]')
+          echo "Current NGINX Image details: $IMAGE_DETAILS"
+          echo "current_nginx_image=$(echo "$IMAGE_DETAILS" | jq -c .)" >> $GITHUB_OUTPUT
+
+      - name: Extract Current NGINX Image
+        if: steps.check-changes.outputs.skip_build == 'true'
+        id: extract-current-nginx-image-tag
+        run: |
+          # Retrieve the JSON output from the previous step
+          IMAGE_DETAILS='${{ steps.describe-current-nginx-image.outputs.current_nginx_image }}'
+          # Extract image tags using jq
+          IMAGE_TAGS=$(echo "$IMAGE_DETAILS" | jq -r '.imageTags[0]')
+          echo "Extracted image tags: $IMAGE_TAGS"
+          # Store the current NGINX Image Tag in a GitHub Actions output variable
+          echo "nginx_current_image_tag=$IMAGE_TAGS" >> $GITHUB_OUTPUT
+
+      - name: Display Current NGINX Image Tags
+        if: steps.check-changes.outputs.skip_build == 'true'
+        run: |
+          echo "Current NGINX Image Tags: ${{ steps.extract-current-nginx-image-tag.outputs.nginx_current_image_tag }}"
+
+      # Build Image Tags
 
       - name: Build, tag, and push NGINX Image to Amazon ECR
         if: steps.check-changes.outputs.skip_build == 'false'
@@ -154,25 +191,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG
           echo "php_image=$ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Render ECS task definition for NGINX
-        id: render-nginx-task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME_NGINX }}
-          image: ${{ steps.build-nginx-image.outputs.nginx_image }}
-
-      - name: Render ECS task definition for PHP
-        id: render-php-task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.render-nginx-task-def.outputs.task-definition }}
-          container-name: ${{ env.CONTAINER_NAME_PHP }}
-          image: ${{ steps.build-php-image.outputs.php_image }}
-
-      - name: Print updated task definition
-        if: steps.check-changes.outputs.skip_build == 'false'
-        run: cat ${{ steps.render-php-task-def.outputs.task-definition }}
+      # Print Newly Built Images
 
       - name: Print NGINX image URI
         if: steps.check-changes.outputs.skip_build == 'false'
@@ -181,6 +200,59 @@ jobs:
       - name: Print PHP image URI
         if: steps.check-changes.outputs.skip_build == 'false'
         run: echo ${{ steps.build-php-image.outputs.php_image }}
+
+    # Render Task Definitions 
+
+    # If 'skip_build' is false then render task defs with new image tags
+      - name: Render ECS task definition for NGINX
+        if: steps.check-changes.outputs.skip_build == 'false'
+        id: render-nginx-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME_NGINX }}
+          image: ${{ steps.build-nginx-image.outputs.nginx_image }}
+
+      - name: Render ECS task definition for PHP
+        if: steps.check-changes.outputs.skip_build == 'false'
+        id: render-php-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-nginx-task-def.outputs.task-definition }}
+          container-name: ${{ env.CONTAINER_NAME_PHP }}
+          image: ${{ steps.build-php-image.outputs.php_image }}
+
+
+    # If 'skip_build' is true then render task defs without new image tags
+      - name: Render ECS task definition for NGINX without new image tag 
+        if: steps.check-changes.outputs.skip_build == 'true'
+        id: render-nginx-task-def
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          NGINX_IMAGE_TAG: ${{ steps.extract-current-nginx-image-tag.outputs.nginx_current_image_tag }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME_NGINX }}
+          image: $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG
+
+      - name: Render ECS task definition for PHP
+        if: steps.check-changes.outputs.skip_build == 'true'
+        id: render-php-task-def
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          PHP_IMAGE_TAG: ${{ steps.extract-current-php-image-tag.outputs.php_current_image_tag }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-nginx-task-def.outputs.task-definition }}
+          container-name: ${{ env.CONTAINER_NAME_PHP }}
+          image: $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG
+
+     - name: Print updated task definition
+        run: cat ${{ steps.render-php-task-def.outputs.task-definition }}
+
+
+    # Deploy To ECS
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2

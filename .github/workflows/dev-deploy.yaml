@@ -106,8 +106,8 @@ jobs:
         id: get_current_revision
         run: |
           aws ecs describe-services \
-            --cluster <YOUR_ECS_CLUSTER_NAME> \
-            --service <YOUR_ECS_SERVICE_NAME> \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
             --query 'services[].deployments[0].revision' \
             --output text
 
@@ -115,8 +115,8 @@ jobs:
         id: get_previous_task_definition
         run: |
           aws ecs describe-services \
-            --cluster <YOUR_ECS_CLUSTER_NAME> \
-            --service <YOUR_ECS_SERVICE_NAME> \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
             --query 'services[].deployments[1].taskDefinition' \
             --output text
 

@@ -150,14 +150,16 @@ jobs:
       - name: Extract Current NGINX Image
         if: steps.check-changes.outputs.skip_build == 'true'
         id: extract-current-nginx-image-tag
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           # Retrieve the JSON output from the previous step
           IMAGE_DETAILS='${{ steps.describe-current-nginx-image.outputs.current_nginx_image }}'
           # Extract image tags using jq
-          IMAGE_TAGS=$(echo "$IMAGE_DETAILS" | jq -r '.imageTags[0]')
-          echo "Extracted image tags: $IMAGE_TAGS"
+          IMAGE_TAG=$(echo "$IMAGE_DETAILS" | jq -r '.imageTags[0]')
+          echo "Extracted image tags: $IMAGE_TAG"
           # Store the current NGINX Image Tag in a GitHub Actions output variable
-          echo "nginx_current_image_tag=$IMAGE_TAGS" >> $GITHUB_OUTPUT
+          echo "nginx_current_image_tag=$ECR_REGISTRY/$ECR_NGINX_REPOSITORY/$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Display Current NGINX Image Tags
         if: steps.check-changes.outputs.skip_build == 'true'
@@ -237,7 +239,7 @@ jobs:
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: ${{ env.CONTAINER_NAME_NGINX }}
-          image: $ECR_REGISTRY/$ECR_NGINX_REPOSITORY:$NGINX_IMAGE_TAG
+          image: ${{ steps.extract-current-nginx-image-tag.outputs.nginx_current_image_tag }}
 
       - name: Render ECS task definition for PHP
         if: steps.check-changes.outputs.skip_build == 'true'

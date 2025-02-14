@@ -123,8 +123,7 @@ jobs:
           echo "Extracted image tags: $IMAGE_TAGS"
           # Store the tags in a GitHub Actions output variable
           echo "php_image_tags=$IMAGE_TAGS" >> $GITHUB_OUTPUT
-          # Display Current PHP Image Tags
-
+          
       - name: Display Current PHP Image Tags
         run: |
           echo "Current PHP Image Tags: ${{ steps.extract-image-tags.outputs.php_image_tags }}"

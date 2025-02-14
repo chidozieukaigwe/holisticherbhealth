@@ -122,9 +122,12 @@ jobs:
           IMAGE_TAGS=$(echo "$IMAGE_DETAILS" | jq -r '.imageTags[]')
           echo "Extracted image tags: $IMAGE_TAGS"
           # Store the tags in a GitHub Actions output variable
-          echo "image_tags=$IMAGE_TAGS" >> $GITHUB_OUTPUT
+          echo "php_image_tags=$IMAGE_TAGS" >> $GITHUB_OUTPUT
           # Display Current PHP Image Tags
-          cat image_tags
+
+      - name: Display Current PHP Image Tags
+        run: |
+          echo "Current PHP Image Tags: ${{ steps.extract-image-tags.outputs.php_image_tags }}"
 
       - name: Build, tag, and push NGINX Image to Amazon ECR
         if: steps.check-changes.outputs.skip_build == 'false'

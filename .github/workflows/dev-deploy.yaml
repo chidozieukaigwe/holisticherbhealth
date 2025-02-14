@@ -14,6 +14,9 @@ env:
   ECS_TASK_DEFINITION: ./aws/dev-task-definition.json
   CONTAINER_NAME_NGINX: holisticherbhealth-server
   CONTAINER_NAME_PHP: holisticherbhealth-api
+  WAIT_FOR_SERVICE_STABILITY: true
+  FORCE_NEW_DEPLOYMENT: true 
+  DESIRED_COUNT: 1
 
 jobs:
   lint:
@@ -248,21 +251,40 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME_PHP }}
           image: $ECR_REGISTRY/$ECR_PHP_REPOSITORY:$PHP_IMAGE_TAG
 
-      - name: Print updated task definition
+    # Print Updated Task Definition
+
+      - name: Print New Task Definition With New Images
+        if: steps.check-changes.outputs.skip_build == 'false'
         run: cat ${{ steps.render-php-task-def.outputs.task-definition }}
 
+      - name: Print New Task Definition With Unchanged Images
+        if: steps.check-changes.outputs.skip_build == 'true'
+        run: cat ${{ steps.render-unchanged-php-task-def.outputs.task-definition }}
 
+      
     # Deploy To ECS
 
-      - name: Deploy Amazon ECS task definition
+      - name: Deploy Amazon ECS task definition with New Images
+        if: steps.check-changes.outputs.skip_build == 'false'
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.render-php-task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
-          force-new-deployment: true
-          desired-count: 1
+          wait-for-service-stability: ${{ env.WAIT_FOR_SERVICE_STABILITY }}
+          force-new-deployment: ${{ env.FORCE_NEW_DEPLOYMENT }}
+          desired-count: ${{ env.DESIRED_COUNT }}
+      
+      - name: Deploy Amazon ECS task definition with Unchanged Images
+        if: steps.check-changes.outputs.skip_build == 'true'
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-unchanged-php-task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: ${{ env.WAIT_FOR_SERVICE_STABILITY }}
+          force-new-deployment: ${{ env.FORCE_NEW_DEPLOYMENT }}
+          desired-count: ${{ env.DESIRED_COUNT }}
       
      
     # ###### BELOW NEEDS TO BE REVIEWED ########

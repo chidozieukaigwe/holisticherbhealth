@@ -111,13 +111,17 @@ jobs:
             --repository-name $ECR_PHP_REPOSITORY \
             --query 'sort_by(imageDetails,&imagePushedAt)[-1]')
           echo "Current PHP Image details: $IMAGE_DETAILS"
-          echo "current_php_image=$IMAGE_DETAILS | jq -r '.imageTags[0]' " >> $GITHUB_OUTPUT
+          echo "current_php_image=$(echo "$IMAGE_DETAILS" | jq -c .)" >> $GITHUB_OUTPUT
 
       - name: Extract image tags
         id: extract-image-tags
         run: |
-          IMAGE_TAGS=$(echo '${{ steps.describe-ecr-image.outputs.current_php_image }}' | jq -r '.imageTags[0]')
+          # Retrieve the JSON output from the previous step
+          IMAGE_DETAILS='${{ steps.describe-current-php-image.outputs.current_php_image }}'
+          # Extract image tags using jq
+          IMAGE_TAGS=$(echo "$IMAGE_DETAILS" | jq -r '.imageTags[]')
           echo "Extracted image tags: $IMAGE_TAGS"
+          # Store the tags in a GitHub Actions output variable
           echo "image_tags=$IMAGE_TAGS" >> $GITHUB_OUTPUT
 
       - name: Build, tag, and push NGINX Image to Amazon ECR

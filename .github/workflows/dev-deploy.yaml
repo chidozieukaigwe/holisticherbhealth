@@ -107,8 +107,6 @@ jobs:
       - name: Describe The Currently Running PHP Image
         if: steps.check-changes.outputs.skip_build == 'true'
         id: describe-current-php-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           IMAGE_DETAILS=$(aws ecr describe-images \
             --repository-name $ECR_PHP_REPOSITORY \
@@ -119,14 +117,16 @@ jobs:
       - name: Extract Current PHP Image
         if: steps.check-changes.outputs.skip_build == 'true'
         id: extract-current-php-image-tag
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           # Retrieve the JSON output from the previous step
           IMAGE_DETAILS='${{ steps.describe-current-php-image.outputs.current_php_image }}'
           # Extract image tags using jq
-          IMAGE_TAGS=$(echo "$IMAGE_DETAILS" | jq -r '.imageTags[0]')
-          echo "Extracted image tags: $IMAGE_TAGS"
+          IMAGE_TAG=$(echo "$IMAGE_DETAILS" | jq -r '.imageTags[0]')
+          echo "Extracted image tags: $IMAGE_TAG"
           # Store the current PHP Image Tag in a GitHub Actions output variable
-          echo "php_current_image_tag=$IMAGE_TAGS" >> $GITHUB_OUTPUT
+          echo "php_current_image_tag=$ECR_REGISTRY/$ECR_PHP_REPOSITORY/$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Display Current PHP Image Tags
         if: steps.check-changes.outputs.skip_build == 'true'
@@ -138,8 +138,6 @@ jobs:
       - name: Describe The Currently Running NGINX Image
         if: steps.check-changes.outputs.skip_build == 'true'
         id: describe-current-nginx-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           IMAGE_DETAILS=$(aws ecr describe-images \
             --repository-name $ECR_NGINX_REPOSITORY \

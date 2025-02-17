@@ -1,5 +1,7 @@
 name: CI/CD Pipeline
 
+# If only github workflows is updated why deploy to ECS - wasting resources
+
 on:
   push:
     branches:
@@ -17,6 +19,9 @@ env:
   WAIT_FOR_SERVICE_STABILITY: true
   FORCE_NEW_DEPLOYMENT: true 
   DESIRED_COUNT: 1
+
+permissions:
+  contents: read
 
 jobs:
   lint:
@@ -49,6 +54,7 @@ jobs:
         run: composer codebeautify
 
   test:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Set Up PHP
@@ -76,6 +82,7 @@ jobs:
         run: composer run-tests
 # Add Caching
   aws:
+    needs: [lint,test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

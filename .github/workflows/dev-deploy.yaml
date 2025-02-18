@@ -52,7 +52,7 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
-      - name: Install dependencies
+      - name: Install dependencies (if cache missed)
         if: steps.composer-cache.outputs.cache-hit != 'true'
         working-directory: ./src
         run: composer install --no-interaction --prefer-dist --no-progress --ignore-platform-reqs
@@ -88,9 +88,10 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
-      - name: Check If Cache Was Hit
-        run: cat ${{ steps.composer-cache.outputs.cache-hit }}
-      - name: Install dependencies
+      - name: Debug Cache Hit
+        run: |
+          echo "Cache hit ${{ steps.composer-cache.outputs.cache-hit }}"
+      - name: Install dependencies (if cache missed)
         if: steps.composer-cache.outputs.cache-hit != 'true'
         working-directory: ./src
         run: composer install --no-interaction --prefer-dist --no-progress --ignore-platform-reqs

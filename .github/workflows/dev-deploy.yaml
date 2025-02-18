@@ -45,6 +45,7 @@ jobs:
         run: |
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - uses: actions/cache@v4
+        id: composer-cache-restore
         with:
           path: |
               ${{ steps.composer-cache.outputs.dir }}
@@ -53,7 +54,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
       - name: Install dependencies (if cache missed)
-        if: steps.composer-cache.outputs.cache-hit != 'true'
+        if: steps.composer-cache-restore.outputs.cache-hit != 'true'
         working-directory: ./src
         run: composer install --no-interaction --prefer-dist --no-progress --ignore-platform-reqs
       - name: Run PHP CodeSniffer
@@ -97,7 +98,7 @@ jobs:
           echo "Cache hit value: ${{ steps.composer-cache-restore.outputs.cache-hit }}"
 
       - name: Install dependencies (if cache missed)
-        if: steps.composer-cache.outputs.cache-hit != 'true'
+        if: steps.composer-cache-restore.outputs.cache-hit != 'true'
         working-directory: ./src
         run: composer install --no-interaction --prefer-dist --no-progress --ignore-platform-reqs
       - name: Run tests

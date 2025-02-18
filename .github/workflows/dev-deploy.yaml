@@ -1,13 +1,14 @@
 name: CI/CD Pipeline
-
-# If only github workflows is updated why deploy to ECS - wasting resources
-
+# review the folder github_actions_workflows_events from github actions tut for pull_request logic
 on:
   push:
     branches:
       - develop
-    paths-ignore: 
-      - '.github/workflows/*'
+    #actions do not run if files here are updated
+    # paths-ignore: 
+    #   - '.github/workflows/*' 
+      # @todo test the dockerfiles and src files for paths ignore this will stop the need for custom code below i.e 'skip_build'
+      # identify how to handle task-def file
   workflow_dispatch:
 
 env:
@@ -37,16 +38,19 @@ jobs:
           coverage: none
       - name: Get Code
         uses: actions/checkout@v3
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v3
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
         with:
-          path: vendor
-          key: deps-composer-${{ hashFiles('**/composer.lock') }}
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
-            deps-composer-
+            ${{ runner.os }}-composer-
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.composer-cache.outputs.cache-hit != 'true'
         working-directory: ./src
         run: composer install --no-interaction --prefer-dist --no-progress --ignore-platform-reqs
       - name: Run PHP CodeSniffer
@@ -67,16 +71,18 @@ jobs:
           coverage: none
       - name: Get Code
         uses: actions/checkout@v3
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: deps-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            deps-composer-
+      - name: Get Composer Cache Directory
+          id: composer-cache
+          run: |
+            echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        - uses: actions/cache@v4
+          with:
+            path: ${{ steps.composer-cache.outputs.dir }}
+            key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+            restore-keys: |
+              ${{ runner.os }}-composer-
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.composer-cache.outputs.cache-hit != 'true'
         working-directory: ./src
         run: composer install --no-interaction --prefer-dist --no-progress --ignore-platform-reqs
       - name: Run tests

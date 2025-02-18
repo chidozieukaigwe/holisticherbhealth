@@ -72,9 +72,9 @@ jobs:
       - name: Get Code
         uses: actions/checkout@v3
       - name: Get Composer Cache Directory
-          id: composer-cache
-          run: |
-            echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
         - uses: actions/cache@v4
           with:
             path: ${{ steps.composer-cache.outputs.dir }}

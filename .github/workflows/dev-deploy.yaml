@@ -46,7 +46,9 @@ jobs:
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - uses: actions/cache@v4
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
+        path: |
+            ${{ steps.composer-cache.outputs.dir }}
+            ./src/vender
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
@@ -80,10 +82,14 @@ jobs:
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - uses: actions/cache@v4
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
+          path: |
+            ${{ steps.composer-cache.outputs.dir }}
+            ./src/vender
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
+      - name: Check If Cache Was Hit
+        run: cat ${{ steps.composer-cache.outputs.cache-hit }}
       - name: Install dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
         working-directory: ./src

@@ -120,7 +120,6 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-        mask-password: true  # Ensure Docker password is masked
 
       # PHP Current Image Tag
       - name: Describe The Currently Running PHP Image

@@ -6,6 +6,9 @@ on:
   push:
     branches:
       - develop
+    paths-ignore: 
+      - '.github/workflows/*'
+  workflow_dispatch:
 
 env:
   AWS_REGION: us-east-2
@@ -105,10 +108,12 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+          mask-password: true  # Ensure Docker password is masked
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        mask-password: true  # Ensure Docker password is masked
 
       # PHP Current Image Tag
       - name: Describe The Currently Running PHP Image

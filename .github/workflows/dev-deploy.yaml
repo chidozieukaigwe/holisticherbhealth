@@ -41,6 +41,7 @@ jobs:
 
       - name: Get Composer Cache Directory
         id: composer-cache
+        working-directory: ./src
         run: |
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - uses: actions/cache@v4
@@ -74,6 +75,7 @@ jobs:
 
       - name: Get Composer Cache Directory
         id: composer-cache
+        working-directory: ./src
         run: |
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - uses: actions/cache@v4
@@ -115,11 +117,12 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          mask-password: true  # Ensure Docker password is masked
-
+      
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        with: 
+          mask-password: true  # Ensure Docker password is masked
 
       # PHP Current Image Tag
       - name: Describe The Currently Running PHP Image

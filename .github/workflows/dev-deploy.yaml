@@ -90,7 +90,7 @@ jobs:
             ${{ runner.os }}-composer-
       - name: Debug Cache Hit
         run: |
-          echo "Cache hit ${{ steps.composer-cache.outputs.cache-hit }}"
+          echo "${{ steps.composer-cache.outputs.cache-hit }}"
       - name: Install dependencies (if cache missed)
         if: steps.composer-cache.outputs.cache-hit != 'true'
         working-directory: ./src

@@ -76,11 +76,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Get Composer Cache Directory
-        id: composer-cache
         working-directory: ./src
         run: |
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - uses: actions/cache@v4
+        id: composer-cache
         with:
           path: |
             ${{ steps.composer-cache.outputs.dir }}
@@ -90,7 +90,7 @@ jobs:
             ${{ runner.os }}-composer-
       - name: Debug Cache Hit
         run: |
-          echo "${{ steps.composer-cache.outputs.cache-hit }}"
+          echo "Cache hit value: ${{ steps.composer-cache.outputs.cache-hit }}"
       - name: Install dependencies (if cache missed)
         if: steps.composer-cache.outputs.cache-hit != 'true'
         working-directory: ./src

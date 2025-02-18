@@ -46,9 +46,9 @@ jobs:
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - uses: actions/cache@v4
         with:
-        path: |
-            ${{ steps.composer-cache.outputs.dir }}
-            ./src/vender
+          path: |
+              ${{ steps.composer-cache.outputs.dir }}
+              ./src/vender
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-

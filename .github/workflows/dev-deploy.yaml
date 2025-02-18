@@ -92,7 +92,7 @@ jobs:
 
       - name: Debug Cache Hit
         run: |
-          echo "Cache hit value: ${{ steps.composer-cache.outputs }}"
+          echo "Cache hit value: ${{ steps.composer-cache.outputs.cache-hit }}"
 
       - name: Install dependencies (if cache missed)
         if: steps.composer-cache.outputs.cache-hit != 'true'
